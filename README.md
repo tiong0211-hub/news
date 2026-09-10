@@ -18,11 +18,14 @@ GitHub Actions 스케줄로 완전 자동 실행됩니다.
 
 ## 사전 준비
 
-### 1) 네이버 검색 API
+### 1) 네이버 검색 API (Naver Cloud Platform)
 
-1. https://developers.naver.com/apps 에서 애플리케이션 등록
-2. 사용 API에서 "검색" 추가
-3. 발급된 Client ID / Client Secret 확인
+검색 오픈API가 Naver Cloud Platform(NCP)으로 이전되어, 현재는 NCP 콘솔에서 신청합니다.
+
+1. https://console.ncloud.com 에서 "AI·Application Service > Search" (또는 "NAVER 검색") API 신청
+2. 신청한 Application의 "인증 정보"에서 Client ID(`X-NCP-APIGW-API-KEY-ID`) / Client Secret(`X-NCP-APIGW-API-KEY`) 확인
+   - 예전 developers.naver.com 방식과 키 형태는 비슷하지만, 요청 헤더 이름과 엔드포인트가 다릅니다
+     (`src/collectors/naver.py` 참고)
 
 ### 2) Gemini API
 

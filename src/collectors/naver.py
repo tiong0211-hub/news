@@ -1,4 +1,4 @@
-"""국내 경제 뉴스 수집 (네이버 검색 API - 뉴스)"""
+"""국내 경제 뉴스 수집 (NAVER Cloud Platform 검색 API - 뉴스)"""
 import html
 import re
 
@@ -6,7 +6,9 @@ import requests
 
 from .. import config
 
-NAVER_NEWS_URL = "https://openapi.naver.com/v1/search/news.json"
+# 검색 오픈API가 Naver Cloud Platform(NCP) API Gateway로 이전되면서
+# 엔드포인트와 인증 헤더가 변경되었다. (기존 openapi.naver.com + X-Naver-Client-* 방식은 더 이상 사용 불가)
+NAVER_NEWS_URL = "https://naveropenapi.apigw.ntruss.com/search/v1/news.json"
 
 
 def _strip_tags(text: str) -> str:
@@ -19,8 +21,8 @@ def fetch(display_per_query: int = 15) -> list[dict]:
         raise RuntimeError("NAVER_CLIENT_ID / NAVER_CLIENT_SECRET 환경변수가 설정되지 않았습니다.")
 
     headers = {
-        "X-Naver-Client-Id": config.NAVER_CLIENT_ID,
-        "X-Naver-Client-Secret": config.NAVER_CLIENT_SECRET,
+        "X-NCP-APIGW-API-KEY-ID": config.NAVER_CLIENT_ID,
+        "X-NCP-APIGW-API-KEY": config.NAVER_CLIENT_SECRET,
     }
 
     seen_links = set()
