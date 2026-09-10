@@ -29,7 +29,8 @@ def _resolve_final_url(session: requests.Session, google_link: str, timeout: int
             headers={"User-Agent": "Mozilla/5.0 (compatible; NewsBriefingBot/1.0)"},
         )
         return resp.url
-    except requests.RequestException:
+    except requests.RequestException as exc:
+        logger.warning("Google News 리다이렉트 해석 실패: %s (%s)", google_link, exc)
         return ""
 
 
@@ -47,14 +48,21 @@ def fetch(entries_per_query: int = 15, window: str = "when:1d") -> list[dict]:
             url = f"{GOOGLE_NEWS_RSS_URL}?q={q}&hl=en-US&gl=US&ceid=US:en"
             feed = feedparser.parse(url)
             kept = 0
+            unresolved = 0
+            mismatched_sample = ""
             for entry in feed.entries[:entries_per_query]:
                 google_link = entry.get("link", "")
                 if not google_link:
                     continue
                 link = _resolve_final_url(session, google_link)
-                if not link or link in seen_links:
+                if not link:
+                    unresolved += 1
+                    continue
+                if link in seen_links:
                     continue
                 if not is_allowed_domain(link, [domain]):
+                    if not mismatched_sample:
+                        mismatched_sample = link
                     continue
                 seen_links.add(link)
                 kept += 1
@@ -68,5 +76,12 @@ def fetch(entries_per_query: int = 15, window: str = "when:1d") -> list[dict]:
                         "published": entry.get("published", ""),
                     }
                 )
-            logger.info("Google News[%s]: raw=%d kept=%d", domain, len(feed.entries), kept)
+            logger.info(
+                "Google News[%s]: raw=%d kept=%d unresolved=%d mismatched_sample=%s",
+                domain,
+                len(feed.entries),
+                kept,
+                unresolved,
+                mismatched_sample,
+            )
     return articles
