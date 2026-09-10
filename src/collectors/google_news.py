@@ -1,5 +1,6 @@
 """해외 경제 뉴스 수집 (Google News RSS)"""
 import html
+import logging
 import re
 import urllib.parse
 
@@ -9,6 +10,8 @@ from .. import config
 from ..sources import is_allowed_domain
 
 GOOGLE_NEWS_RSS_URL = "https://news.google.com/rss/search"
+
+logger = logging.getLogger(__name__)
 
 
 def _strip_tags(text: str) -> str:
@@ -27,6 +30,7 @@ def fetch(entries_per_query: int = 20, window: str = "when:1d") -> list[dict]:
         q = urllib.parse.quote(f"site:{domain} {window}")
         url = f"{GOOGLE_NEWS_RSS_URL}?q={q}&hl=en-US&gl=US&ceid=US:en"
         feed = feedparser.parse(url)
+        kept = 0
         for entry in feed.entries[:entries_per_query]:
             link = entry.get("link", "")
             if not link or link in seen_links:
@@ -34,6 +38,7 @@ def fetch(entries_per_query: int = 20, window: str = "when:1d") -> list[dict]:
             if not is_allowed_domain(link, [domain]):
                 continue
             seen_links.add(link)
+            kept += 1
             articles.append(
                 {
                     "source": "google_news",
@@ -44,4 +49,13 @@ def fetch(entries_per_query: int = 20, window: str = "when:1d") -> list[dict]:
                     "published": entry.get("published", ""),
                 }
             )
+        logger.info(
+            "Google News[%s]: raw=%d kept=%d sample_link=%s status=%s bozo=%s",
+            domain,
+            len(feed.entries),
+            kept,
+            feed.entries[0].get("link", "") if feed.entries else "",
+            getattr(feed, "status", "?"),
+            getattr(feed, "bozo", "?"),
+        )
     return articles
