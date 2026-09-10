@@ -1,6 +1,6 @@
 # 매일 경제 뉴스 브리핑 → 카카오톡
 
-매일 아침 국내(네이버)·해외(WSJ/FT/Nikkei Asia 공식 RSS)의 **당일 발행** 경제 뉴스를 **신뢰 언론사 목록**에서만
+매일 아침 국내(네이버)·해외(WSJ/FT/Nikkei Asia/CNBC/CNN Business 공식 RSS)의 **당일 발행** 경제 뉴스를 **신뢰 언론사 목록**에서만
 수집해 OpenAI로 중복 제거·번역·요약·선별한 뒤, 예쁘게 정리된 뉴스레터 페이지를 GitHub Pages에
 발행하고 카카오톡 "나에게 보내기"로 그 링크 1건을 전송합니다. GitHub Actions 스케줄로 완전 자동
 실행됩니다.
@@ -9,7 +9,7 @@
 
 1. 네이버 검색 API(뉴스)로 `NAVER_QUERIES` 키워드별 국내 경제 뉴스 수집 → `DOMESTIC_SOURCE_DOMAINS`
    언론사 + 오늘(KST) 발행분만 필터링
-2. `FOREIGN_SOURCE_DOMAINS`에 매핑된 각 언론사(WSJ/FT/Nikkei Asia)의 공식 RSS 피드에서 수집
+2. `FOREIGN_SOURCE_DOMAINS`에 매핑된 각 언론사(WSJ/FT/Nikkei Asia/CNBC/CNN Business)의 공식 RSS 피드에서 수집
    → 오늘(KST) 발행분만 필터링
 3. OpenAI(`OPENAI_MODEL`, 기본 `gpt-4o-mini`)가 두 목록을 합쳐서
    - 중복/유사 기사 통합
@@ -103,7 +103,7 @@
 | `OPENAI_MODEL` | `gpt-4o-mini` | 사용할 OpenAI 모델 |
 | `NAVER_QUERIES` | `경제,증시,코스피,금리,환율,부동산,수출입` | 국내 뉴스 검색 키워드(쉼표 구분) |
 | `DOMESTIC_SOURCE_DOMAINS` | `mk.co.kr,hankyung.com,mt.co.kr,heraldcorp.com,biz.chosun.com,fnnews.com` | 국내 신뢰 언론사 도메인(쉼표 구분). 매일경제/한국경제/머니투데이/헤럴드경제/조선비즈/파이낸셜뉴스 |
-| `FOREIGN_SOURCE_DOMAINS` | `wsj.com,ft.com,nikkei.com` | 해외 신뢰 언론사 도메인(쉼표 구분). WSJ/FT/닛케이. 각 도메인은 `src/collectors/foreign_news.py`의 `KNOWN_FEEDS`에 등록된 RSS 피드가 있어야 실제로 수집됩니다 |
+| `FOREIGN_SOURCE_DOMAINS` | `wsj.com,ft.com,nikkei.com,cnbc.com,cnn.com` | 해외 신뢰 언론사 도메인(쉼표 구분). WSJ/FT/닛케이/CNBC/CNN Business. 각 도메인은 `src/collectors/foreign_news.py`의 `KNOWN_FEEDS`에 등록된 RSS 피드가 있어야 실제로 수집됩니다 |
 | `TOP_N` | `10` | 최종 선별 뉴스 개수 |
 | `EMAIL_SMTP_HOST` | `smtp.gmail.com` | 이메일 발송용 SMTP 서버 (Gmail이 아니면 변경) |
 | `EMAIL_SMTP_PORT` | `587` | SMTP 포트 |

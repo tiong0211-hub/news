@@ -24,7 +24,9 @@ NAVER_QUERIES = _split_csv(_env("NAVER_QUERIES", "경제,증시,코스피,금리
 DOMESTIC_SOURCE_DOMAINS = _split_csv(
     _env("DOMESTIC_SOURCE_DOMAINS", "mk.co.kr,hankyung.com,mt.co.kr,heraldcorp.com,biz.chosun.com,fnnews.com")
 )
-FOREIGN_SOURCE_DOMAINS = _split_csv(_env("FOREIGN_SOURCE_DOMAINS", "wsj.com,ft.com,nikkei.com"))
+FOREIGN_SOURCE_DOMAINS = _split_csv(
+    _env("FOREIGN_SOURCE_DOMAINS", "wsj.com,ft.com,nikkei.com,cnbc.com,cnn.com")
+)
 
 OPENAI_API_KEY = _env("OPENAI_API_KEY")
 OPENAI_MODEL = _env("OPENAI_MODEL", "gpt-4o-mini")

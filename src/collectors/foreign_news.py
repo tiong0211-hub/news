@@ -17,6 +17,8 @@ KNOWN_FEEDS = {
     "wsj.com": "https://feeds.a.dj.com/rss/RSSMarketsMain.xml",
     "ft.com": "https://www.ft.com/rss/home",
     "nikkei.com": "https://asia.nikkei.com/rss/feed/nar",
+    "cnbc.com": "https://www.cnbc.com/id/100370673/device/rss/rss.html",
+    "cnn.com": "https://rss.cnn.com/rss/money_news_companies.rss",
 }
 
 
