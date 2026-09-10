@@ -24,6 +24,8 @@ def refresh_access_token() -> tuple[str, str | None]:
         "client_id": config.KAKAO_REST_API_KEY,
         "refresh_token": config.KAKAO_REFRESH_TOKEN,
     }
+    if config.KAKAO_CLIENT_SECRET:
+        data["client_secret"] = config.KAKAO_CLIENT_SECRET
     resp = requests.post(TOKEN_URL, data=data, timeout=15)
     if resp.status_code != 200:
         raise RuntimeError(f"카카오 토큰 갱신 실패 ({resp.status_code}): {resp.text}")

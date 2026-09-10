@@ -6,8 +6,8 @@ load_dotenv()
 
 
 def _env(key: str, default: str = "") -> str:
-    """빈 문자열(예: 설정 안 된 GitHub Actions 변수)도 미설정으로 취급해 기본값을 반환한다."""
-    value = os.environ.get(key, "")
+    """앞뒤 공백/줄바꿈을 제거하고, 빈 문자열(예: 설정 안 된 GitHub Actions 변수)은 미설정으로 취급해 기본값을 반환한다."""
+    value = os.environ.get(key, "").strip()
     return value if value else default
 
 
@@ -27,6 +27,7 @@ OPENAI_API_KEY = _env("OPENAI_API_KEY")
 OPENAI_MODEL = _env("OPENAI_MODEL", "gpt-4o-mini")
 
 KAKAO_REST_API_KEY = _env("KAKAO_REST_API_KEY")
+KAKAO_CLIENT_SECRET = _env("KAKAO_CLIENT_SECRET")
 KAKAO_REFRESH_TOKEN = _env("KAKAO_REFRESH_TOKEN")
 KAKAO_REDIRECT_URI = _env("KAKAO_REDIRECT_URI")
 KAKAO_TEXT_MAX_LEN = int(_env("KAKAO_TEXT_MAX_LEN", "180"))

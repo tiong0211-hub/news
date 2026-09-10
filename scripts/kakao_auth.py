@@ -7,6 +7,8 @@
 3. 앱 설정 > 카카오 로그인 > 동의항목에서 "카카오톡 메시지 전송"(talk_message) 항목을
    "필수 동의" 또는 "선택 동의"로 설정
 4. .env 에 KAKAO_REST_API_KEY, KAKAO_REDIRECT_URI 설정 (Redirect URI는 2번과 동일해야 함)
+5. 앱 키 > 클라이언트 시크릿이 "카카오 로그인"에 대해 활성화(ON)되어 있다면, 그 코드 값을
+   .env의 KAKAO_CLIENT_SECRET에도 설정 (비활성화 상태라면 비워둬도 됨)
 
 실행:
     python -m scripts.kakao_auth
@@ -25,8 +27,9 @@ load_dotenv()
 
 import os  # noqa: E402
 
-REST_API_KEY = os.environ.get("KAKAO_REST_API_KEY", "")
-REDIRECT_URI = os.environ.get("KAKAO_REDIRECT_URI", "")
+REST_API_KEY = os.environ.get("KAKAO_REST_API_KEY", "").strip()
+REDIRECT_URI = os.environ.get("KAKAO_REDIRECT_URI", "").strip()
+CLIENT_SECRET = os.environ.get("KAKAO_CLIENT_SECRET", "").strip()
 
 AUTHORIZE_URL = "https://kauth.kakao.com/oauth/authorize"
 TOKEN_URL = "https://kauth.kakao.com/oauth/token"
@@ -61,6 +64,8 @@ def main() -> None:
         "redirect_uri": REDIRECT_URI,
         "code": code,
     }
+    if CLIENT_SECRET:
+        data["client_secret"] = CLIENT_SECRET
     resp = requests.post(TOKEN_URL, data=data, timeout=15)
     if resp.status_code != 200:
         print(f"토큰 발급 실패 ({resp.status_code}): {resp.text}", file=sys.stderr)

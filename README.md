@@ -60,6 +60,7 @@ GitHub Actions 스케줄로 완전 자동 실행됩니다.
 | `NAVER_CLIENT_SECRET` | 네이버 애플리케이션 Client Secret |
 | `OPENAI_API_KEY` | OpenAI API 키 |
 | `KAKAO_REST_API_KEY` | 카카오 앱 REST API 키 |
+| `KAKAO_CLIENT_SECRET` (조건부) | 앱 키 > 클라이언트 시크릿이 "카카오 로그인"에 대해 활성화(ON)된 경우 그 코드 값. 활성화되어 있으면 토큰 발급/갱신 요청에 필수입니다(없으면 `KOE010 Bad client credentials` 에러). |
 | `KAKAO_REFRESH_TOKEN` | `scripts/kakao_auth.py` 실행 후 발급된 refresh_token |
 | `GH_PAT` (선택) | `repo` 권한 Personal Access Token. 카카오 refresh_token이 만료 임박 시 자동 회전되는데, 이 값을 등록해두면 새 토큰을 GitHub Secret에 자동 반영합니다. 없으면 refresh_token이 회전될 때(대략 2달 주기) 수동으로 다시 발급해야 할 수 있습니다. |
 
