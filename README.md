@@ -1,6 +1,6 @@
 # 매일 경제 뉴스 브리핑 → 카카오톡
 
-매일 아침 국내(네이버)·해외(WSJ/FT/Nikkei Asia/CNBC 공식 RSS)의 **당일 발행** 경제 뉴스를 **신뢰 언론사 목록**에서만
+매일 아침 국내(네이버)·해외(WSJ/FT/Nikkei Asia/CNBC 공식 RSS)의 **전일 정오~발행 시점 발행** 경제 뉴스를 **신뢰 언론사 목록**에서만
 수집해 OpenAI로 중복 제거·번역·요약·선별한 뒤, 예쁘게 정리된 뉴스레터 페이지를 GitHub Pages에
 발행하고 카카오톡 "나에게 보내기"로 그 링크 1건을 전송합니다. GitHub Actions 스케줄로 완전 자동
 실행됩니다.
@@ -8,9 +8,9 @@
 ## 동작 흐름
 
 1. 네이버 검색 API(뉴스)로 `NAVER_QUERIES` 키워드별 국내 경제 뉴스 수집 → `DOMESTIC_SOURCE_DOMAINS`
-   언론사 + 오늘(KST) 발행분만 필터링
+   언론사 + 전일 12:00 KST ~ 발행 시점 사이 발행분만 필터링
 2. `FOREIGN_SOURCE_DOMAINS`에 매핑된 각 언론사(WSJ/FT/Nikkei Asia/CNBC)의 공식 RSS 피드에서 수집
-   → 오늘(KST) 발행분만 필터링
+   → 전일 12:00 KST ~ 발행 시점 사이 발행분만 필터링
 3. OpenAI(`OPENAI_MODEL`, 기본 `gpt-4o-mini`)가 두 목록을 합쳐서
    - 중복/유사 기사 통합
    - 투자와 무관한 기사 제외
@@ -144,7 +144,7 @@ python -m src.send_email
 - 요약/선별 기준: `src/summarizer.py`의 `SYSTEM_PROMPT`
 - 뉴스레터 페이지 디자인: `src/newsletter.py`
 - 카카오 메시지 문구: `src/kakao.py`의 `send_briefing_link`
-- "오늘 발행" 판정 기준: `src/freshness.py`의 `is_today_kst` (KST 기준 달력일 일치)
+- 수집 대상 시간대: `src/freshness.py`의 `is_in_briefing_window` (전일 12:00 KST ~ 발행 시점, `WINDOW_START_HOUR`로 시작 시각 조정 가능)
 - 아카이브 보관 기간: `src/build.py`의 `ARCHIVE_RETENTION_DAYS` (기본 14일)
 - 주말/공휴일 건너뛰기 로직: `src/kr_calendar.py` (`holidays` 패키지의 한국 공휴일 데이터 사용)
 - 실행 시각: `.github/workflows/daily-news.yml`의 `cron`
@@ -159,9 +159,9 @@ python -m src.send_email
   `src/collectors/foreign_news.py`의 `KNOWN_FEEDS`에 해당 언론사의 RSS 피드 URL도 함께 등록해야 합니다.
   CNN Business는 공식 RSS 서비스가 종료되어(rss.cnn.com 전 피드 403) 제외했습니다. 작동하는
   대체 피드를 찾으면 다시 추가할 수 있습니다.
-- "오늘 발행" 필터는 각 API/피드가 제공하는 발행일(pubDate)에 의존합니다. 발행일을 파싱할 수 없는
+- 수집 시간대 필터는 각 API/피드가 제공하는 발행일(pubDate)에 의존합니다. 발행일을 파싱할 수 없는
   기사는 안전하게 제외됩니다.
-- 언론사 화이트리스트 + 당일 발행 필터를 같이 적용하다 보니, 날에 따라 최종 후보가 적어(심하면 0건)
+- 언론사 화이트리스트 + 시간대 필터를 같이 적용하다 보니, 날에 따라 최종 후보가 적어(심하면 0건)
   선정될 수 있습니다. 후보가 부족하면 `TOP_N`보다 적은 건수만 발송되거나, 아예 발송을 건너뜁니다.
 - 카카오 API는 임의의 파일(PDF 등) 첨부를 지원하지 않아, 뉴스레터는 GitHub Pages 웹페이지로
   발행하고 카카오톡에는 링크만 전송합니다.

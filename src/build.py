@@ -12,7 +12,7 @@ from pathlib import Path
 
 from . import config, newsletter, summarizer
 from .collectors import foreign_news, naver
-from .freshness import KST, is_today_kst
+from .freshness import KST, is_in_briefing_window
 from .kr_calendar import is_skip_day
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -66,13 +66,13 @@ def run() -> None:
 
     logger.info("국내 뉴스 수집 시작")
     domestic = naver.fetch()
-    domestic = [a for a in domestic if is_today_kst(a["published"])]
-    logger.info("국내 뉴스 %d건 수집 (오늘자만)", len(domestic))
+    domestic = [a for a in domestic if is_in_briefing_window(a["published"], now)]
+    logger.info("국내 뉴스 %d건 수집 (전일 정오~발행 시점)", len(domestic))
 
     logger.info("해외 뉴스 수집 시작")
     foreign = foreign_news.fetch()
-    foreign = [a for a in foreign if is_today_kst(a["published"])]
-    logger.info("해외 뉴스 %d건 수집 (오늘자만)", len(foreign))
+    foreign = [a for a in foreign if is_in_briefing_window(a["published"], now)]
+    logger.info("해외 뉴스 %d건 수집 (전일 정오~발행 시점)", len(foreign))
 
     candidates = domestic + foreign
     date_str = now.strftime("%Y-%m-%d")
