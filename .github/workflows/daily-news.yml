@@ -2,8 +2,8 @@ name: Daily Investment News Briefing
 
 on:
   schedule:
-    # 매일 07:30 KST (UTC 22:30 전날)
-    - cron: "30 22 * * *"
+    # 매일 08:00 KST, 월~금만 (UTC 기준 일~목 23:00). 한국 공휴일은 src/build.py에서 건너뜀.
+    - cron: "0 23 * * 0-4"
   workflow_dispatch: {}
 
 permissions:
@@ -33,6 +33,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Collect, summarize and build newsletter page
+        id: build
         env:
           NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
@@ -42,9 +43,11 @@ jobs:
           DOMESTIC_SOURCE_DOMAINS: ${{ vars.DOMESTIC_SOURCE_DOMAINS }}
           FOREIGN_SOURCE_DOMAINS: ${{ vars.FOREIGN_SOURCE_DOMAINS }}
           TOP_N: ${{ vars.TOP_N }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
         run: python -m src.build
 
       - name: Commit newsletter archive
+        if: steps.build.outputs.skip != 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -53,18 +56,22 @@ jobs:
           git push
 
       - name: Configure Pages
+        if: steps.build.outputs.skip != 'true'
         uses: actions/configure-pages@v5
 
       - name: Upload newsletter artifact
+        if: steps.build.outputs.skip != 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs
 
       - name: Deploy to GitHub Pages
+        if: steps.build.outputs.skip != 'true'
         id: deployment
         uses: actions/deploy-pages@v4
 
       - name: Send Kakao link message
+        if: steps.build.outputs.skip != 'true'
         env:
           KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
           KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
@@ -75,6 +82,7 @@ jobs:
         run: python -m src.send_kakao
 
       - name: Send email briefing (optional)
+        if: steps.build.outputs.skip != 'true'
         env:
           EMAIL_SMTP_HOST: ${{ vars.EMAIL_SMTP_HOST }}
           EMAIL_SMTP_PORT: ${{ vars.EMAIL_SMTP_PORT }}

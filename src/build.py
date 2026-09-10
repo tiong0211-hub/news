@@ -6,12 +6,14 @@ GitHub Pages 배포용 정적 페이지와, 카카오 발송 단계에서 쓸 �
 """
 import json
 import logging
+import os
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from . import newsletter, summarizer
+from . import config, newsletter, summarizer
 from .collectors import foreign_news, naver
 from .freshness import KST, is_today_kst
+from .kr_calendar import is_skip_day
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -46,7 +48,22 @@ def _recent_archive_links(exclude_date_str: str) -> list[tuple[str, str]]:
     return [(d, f"archive/{d}.html") for d in dates]
 
 
+def _write_github_output(key: str, value: str) -> None:
+    path = os.environ.get("GITHUB_OUTPUT")
+    if not path:
+        return
+    with open(path, "a", encoding="utf-8") as fh:
+        fh.write(f"{key}={value}\n")
+
+
 def run() -> None:
+    now = datetime.now(KST)
+    if config.GITHUB_EVENT_NAME == "schedule" and is_skip_day(now):
+        logger.info("주말/공휴일이라 오늘(%s)은 발행을 건너뜁니다.", now.strftime("%Y-%m-%d"))
+        _write_github_output("skip", "true")
+        return
+    _write_github_output("skip", "false")
+
     logger.info("국내 뉴스 수집 시작")
     domestic = naver.fetch()
     domestic = [a for a in domestic if is_today_kst(a["published"])]
@@ -58,7 +75,6 @@ def run() -> None:
     logger.info("해외 뉴스 %d건 수집 (오늘자만)", len(foreign))
 
     candidates = domestic + foreign
-    now = datetime.now(KST)
     date_str = now.strftime("%Y-%m-%d")
 
     if not candidates:

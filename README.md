@@ -111,8 +111,13 @@
 
 ## 실행 스케줄
 
-`.github/workflows/daily-news.yml` 기본값은 매일 07:30 KST(UTC 22:30 전날)입니다.
-다른 시간을 원하면 워크플로우 파일의 `cron` 표현식을 수정하세요(cron은 UTC 기준).
+`.github/workflows/daily-news.yml` 기본값은 **평일(월~금) 08:00 KST**(UTC 기준 일~목 23:00)입니다.
+주말은 cron 자체에서 실행되지 않고, **한국 공휴일**(대체공휴일 포함)은 `src/kr_calendar.py`가
+스케줄 실행일 때만 판별해서 뉴스 수집/발송을 전부 건너뜁니다(수동 실행은 공휴일이어도 항상 진행).
+
+다른 시간을 원하면 워크플로우 파일의 `cron` 표현식을 수정하세요(cron은 UTC 기준이라, KST 08:00은
+전날 UTC 23:00입니다). 요일 제한을 바꾸려면 `cron`의 마지막 필드(`0-4` = 일~목, KST 기준 월~금)를
+조정하세요.
 
 수동 실행: 저장소 Actions 탭 → "Daily Investment News Briefing" → Run workflow
 
@@ -141,6 +146,7 @@ python -m src.send_email
 - 카카오 메시지 문구: `src/kakao.py`의 `send_briefing_link`
 - "오늘 발행" 판정 기준: `src/freshness.py`의 `is_today_kst` (KST 기준 달력일 일치)
 - 아카이브 보관 기간: `src/build.py`의 `ARCHIVE_RETENTION_DAYS` (기본 14일)
+- 주말/공휴일 건너뛰기 로직: `src/kr_calendar.py` (`holidays` 패키지의 한국 공휴일 데이터 사용)
 - 실행 시각: `.github/workflows/daily-news.yml`의 `cron`
 
 ## 알려진 제약
