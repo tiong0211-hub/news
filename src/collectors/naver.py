@@ -6,7 +6,9 @@ import requests
 
 from .. import config
 
-NAVER_NEWS_URL = "https://openapi.naver.com/v1/search/news.json"
+# 검색 오픈API가 NAVER API HUB(NCP)로 이전되면서 호스트와 경로가 바뀌었다.
+# (기존 openapi.naver.com/v1/search/news.json 은 NCP 발급 키로는 401)
+NAVER_NEWS_URL = "https://naverapihub.apigw.ntruss.com/search/v1/news"
 
 
 def _strip_tags(text: str) -> str:
