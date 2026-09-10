@@ -3,6 +3,6 @@ __pycache__/
 *.pyc
 .venv/
 
-# 실행 시마다 생성되는 빌드 산출물 (GitHub Pages 아티팩트로만 배포, 커밋 대상 아님)
-docs/
+# docs/는 날짜별 뉴스레터 아카이브라 커밋 대상이다 (14일 지나면 워크플로우가 자동 정리).
+# briefing_meta.json은 build/send_kakao 단계 사이에서만 쓰는 임시 파일이라 커밋하지 않는다.
 briefing_meta.json

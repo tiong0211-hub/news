@@ -45,6 +45,10 @@ PAGE_TEMPLATE = """\
   .meta {{ font-size: 12px; color: #888; }}
   .meta a {{ color: #1a56db; text-decoration: none; }}
   .meta a:hover {{ text-decoration: underline; }}
+  .archive {{ margin-top: 32px; font-size: 13px; color: #666; }}
+  .archive h3 {{ font-size: 13px; margin: 0 0 8px; color: #888; }}
+  .archive a {{ color: #1a56db; text-decoration: none; margin-right: 10px; }}
+  .archive a:hover {{ text-decoration: underline; }}
   footer {{ text-align: center; color: #999; font-size: 12px; margin-top: 32px; }}
 </style>
 </head>
@@ -55,6 +59,7 @@ PAGE_TEMPLATE = """\
     <p>{date_str} · 총 {count}건</p>
   </header>
   {articles_html}
+  {archive_html}
   <footer>매일 자동 수집·요약된 뉴스입니다. 투자 판단의 참고 자료로만 활용하세요.</footer>
 </div>
 </body>
@@ -76,7 +81,8 @@ def _source_label(link: str) -> str:
     return domain.removeprefix("www.") or "출처 미상"
 
 
-def render_html(articles: list[dict], date_str: str) -> str:
+def render_html(articles: list[dict], date_str: str, archive_links: list[tuple[str, str]] | None = None) -> str:
+    """뉴스레터 페이지를 렌더링한다. archive_links: [(날짜, 상대경로 href), ...] 지난 브리핑 목록(최신순)."""
     articles_html = "\n".join(
         ARTICLE_TEMPLATE.format(
             badge_class="domestic" if a.get("category") == "국내" else "foreign",
@@ -90,9 +96,18 @@ def render_html(articles: list[dict], date_str: str) -> str:
         )
         for idx, a in enumerate(articles, start=1)
     )
+
+    archive_html = ""
+    if archive_links:
+        links = "\n".join(
+            f'<a href="{html.escape(href)}">{html.escape(d)}</a>' for d, href in archive_links
+        )
+        archive_html = f'<div class="archive"><h3>지난 브리핑 (최근 14일)</h3>{links}</div>'
+
     return PAGE_TEMPLATE.format(
         title=f"오늘의 경제 뉴스 브리핑 ({date_str})",
         date_str=date_str,
         count=len(articles),
         articles_html=articles_html or "<p>오늘은 선별된 투자 관련 뉴스가 없습니다.</p>",
+        archive_html=archive_html,
     )

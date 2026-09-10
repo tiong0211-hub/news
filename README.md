@@ -17,9 +17,11 @@
    - 해외 기사 한국어 번역
    - 각 기사 2~3문장 한국어 요약
    - 중요도 순 상위 `TOP_N`(기본 10)건 선별
-4. 선별 결과를 `docs/index.html` 뉴스레터 페이지로 렌더링 (기사별 제목/요약/출처/발행시각/원문 링크 포함)
-5. GitHub Pages에 페이지 배포
-6. 카카오톡 "나에게 보내기"로 오늘 페이지 링크 1건 발송
+4. 선별 결과를 `docs/archive/YYYY-MM-DD.html`(날짜별 아카이브)과 `docs/index.html`(오늘자 + 최근
+   14일 아카이브 링크)로 렌더링 (기사별 제목/요약/출처/발행시각/원문 링크 포함)
+5. 14일 지난 아카이브 파일은 자동 삭제, 변경사항을 저장소에 커밋
+6. GitHub Pages에 페이지 배포
+7. 카카오톡 "나에게 보내기"로 오늘 페이지 링크 1건 발송
 
 ## 사전 준비
 
@@ -115,6 +117,7 @@ PAGE_URL="https://example.com" python -m src.send_kakao
 - 뉴스레터 페이지 디자인: `src/newsletter.py`
 - 카카오 메시지 문구: `src/kakao.py`의 `send_briefing_link`
 - "오늘 발행" 판정 기준: `src/freshness.py`의 `is_today_kst` (KST 기준 달력일 일치)
+- 아카이브 보관 기간: `src/build.py`의 `ARCHIVE_RETENTION_DAYS` (기본 14일)
 - 실행 시각: `.github/workflows/daily-news.yml`의 `cron`
 
 ## 알려진 제약
@@ -131,4 +134,6 @@ PAGE_URL="https://example.com" python -m src.send_kakao
   선정될 수 있습니다. 후보가 부족하면 `TOP_N`보다 적은 건수만 발송되거나, 아예 발송을 건너뜁니다.
 - 카카오 API는 임의의 파일(PDF 등) 첨부를 지원하지 않아, 뉴스레터는 GitHub Pages 웹페이지로
   발행하고 카카오톡에는 링크만 전송합니다.
+- 뉴스레터 아카이브(`docs/`)는 저장소에 커밋되어 매일 조금씩 늘어나지만, 14일이 지난 파일은
+  자동으로 삭제되어 무한정 쌓이지 않습니다.
 - OpenAI API 호출 비용이 발생합니다(사용량에 따라 과금).
