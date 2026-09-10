@@ -6,9 +6,7 @@ import requests
 
 from .. import config
 
-# 검색 오픈API가 Naver Cloud Platform(NCP) API Gateway로 이전되면서
-# 엔드포인트와 인증 헤더가 변경되었다. (기존 openapi.naver.com + X-Naver-Client-* 방식은 더 이상 사용 불가)
-NAVER_NEWS_URL = "https://naveropenapi.apigw.ntruss.com/search/v1/news.json"
+NAVER_NEWS_URL = "https://openapi.naver.com/v1/search/news.json"
 
 
 def _strip_tags(text: str) -> str:
