@@ -29,6 +29,15 @@ jobs:
           import os
           import requests
 
+          client_id = os.environ["KAKAO_REST_API_KEY"].strip()
+          redirect_uri = os.environ["KAKAO_REDIRECT_URI"].strip()
+          code = os.environ["AUTH_CODE"].strip()
+
+          raw_client_id = os.environ["KAKAO_REST_API_KEY"]
+          print(f"[diag] client_id len raw={len(raw_client_id)} stripped={len(client_id)}")
+          print(f"[diag] client_id repr head/tail: {raw_client_id[:3]!r} ... {raw_client_id[-3:]!r}")
+          print(f"[diag] code len={len(code)}")
+
           resp = requests.post(
               "https://kauth.kakao.com/oauth/token",
               headers={
@@ -40,9 +49,9 @@ jobs:
               },
               data={
                   "grant_type": "authorization_code",
-                  "client_id": os.environ["KAKAO_REST_API_KEY"],
-                  "redirect_uri": os.environ["KAKAO_REDIRECT_URI"],
-                  "code": os.environ["AUTH_CODE"],
+                  "client_id": client_id,
+                  "redirect_uri": redirect_uri,
+                  "code": code,
               },
               timeout=15,
           )
