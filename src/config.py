@@ -25,7 +25,7 @@ DOMESTIC_SOURCE_DOMAINS = _split_csv(
     _env("DOMESTIC_SOURCE_DOMAINS", "mk.co.kr,hankyung.com,mt.co.kr,heraldcorp.com,biz.chosun.com,fnnews.com")
 )
 FOREIGN_SOURCE_DOMAINS = _split_csv(
-    _env("FOREIGN_SOURCE_DOMAINS", "wsj.com,ft.com,nikkei.com,cnbc.com,cnn.com")
+    _env("FOREIGN_SOURCE_DOMAINS", "wsj.com,ft.com,nikkei.com,cnbc.com")
 )
 
 OPENAI_API_KEY = _env("OPENAI_API_KEY")

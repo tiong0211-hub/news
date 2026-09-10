@@ -18,7 +18,8 @@ KNOWN_FEEDS = {
     "ft.com": "https://www.ft.com/rss/home",
     "nikkei.com": "https://asia.nikkei.com/rss/feed/nar",
     "cnbc.com": "https://www.cnbc.com/id/100370673/device/rss/rss.html",
-    "cnn.com": "https://rss.cnn.com/rss/money_news_companies.rss",
+    # cnn.com: CNN이 공개 RSS 서비스를 종료해 rss.cnn.com 피드가 전부 403을 반환한다
+    # (money_news_companies.rss 등). 작동하는 공식 RSS를 찾으면 여기에 다시 등록한다.
 }
 
 
