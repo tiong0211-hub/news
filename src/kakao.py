@@ -2,7 +2,6 @@
 import base64
 import json
 import logging
-import time
 
 import requests
 
@@ -36,13 +35,7 @@ def refresh_access_token() -> tuple[str, str | None]:
     return access_token, new_refresh_token
 
 
-def _truncate(text: str, max_len: int) -> str:
-    if len(text) <= max_len:
-        return text
-    return text[: max_len - 1].rstrip() + "…"
-
-
-def send_text_memo(access_token: str, text: str, link_url: str | None = None) -> None:
+def send_text_memo(access_token: str, text: str, link_url: str | None = None, button_title: str = "기사 보기") -> None:
     template_object = {
         "object_type": "text",
         "text": text,
@@ -52,7 +45,7 @@ def send_text_memo(access_token: str, text: str, link_url: str | None = None) ->
         },
     }
     if link_url:
-        template_object["button_title"] = "기사 보기"
+        template_object["button_title"] = button_title
 
     resp = requests.post(
         SEND_URL,
@@ -64,20 +57,13 @@ def send_text_memo(access_token: str, text: str, link_url: str | None = None) ->
         raise RuntimeError(f"카카오 메시지 전송 실패 ({resp.status_code}): {resp.text}")
 
 
-def send_briefing(articles: list[dict], date_str: str) -> None:
+def send_briefing_link(count: int, date_str: str, page_url: str | None) -> None:
+    """뉴스레터 페이지 링크 1건을 카카오톡 '나에게 보내기'로 전송한다."""
     access_token, new_refresh_token = refresh_access_token()
 
-    if articles:
-        header_msg = f"📈 오늘의 투자 뉴스 브리핑 ({date_str})\n총 {len(articles)}건"
-        send_text_memo(access_token, header_msg)
-        for idx, article in enumerate(articles, start=1):
-            category = article.get("category", "")
-            title = article.get("title", "")
-            summary = article.get("summary", "")
-            header = f"{idx}. [{category}] {title}" if category else f"{idx}. {title}"
-            body = _truncate(f"{header}\n{summary}", config.KAKAO_TEXT_MAX_LEN)
-            send_text_memo(access_token, body, link_url=article.get("link"))
-            time.sleep(0.3)
+    if count and page_url:
+        text = f"📈 오늘의 투자 뉴스 브리핑 ({date_str})\n국내·해외 경제 뉴스 {count}건을 정리했습니다.\n아래 버튼을 눌러 확인하세요."
+        send_text_memo(access_token, text, link_url=page_url, button_title="브리핑 보기")
     else:
         send_text_memo(access_token, f"📈 ({date_str}) 오늘은 선별된 투자 관련 뉴스가 없습니다.")
 

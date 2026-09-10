@@ -18,14 +18,15 @@ SYSTEM_PROMPT = """\
 5. 최종적으로 중요도 순으로 최대 {top_n}개를 선정하세요. 후보가 부족하면 있는 만큼만 반환하세요.
 6. 각 기사의 summary는 2~3문장, 왜 투자자에게 중요한지가 드러나도록 간결하게 작성하세요.
 
-반드시 아래 JSON 형식으로만 답하세요 (다른 텍스트 금지):
+반드시 아래 JSON 형식으로만 답하세요 (다른 텍스트 금지). "id"는 후보 목록에 주어진 정수 id를 \
+그대로 사용하세요 (중복 기사를 합쳤다면, 가장 정보가 풍부한 쪽의 id):
 {{
   "articles": [
     {{
+      "id": 0,
       "title": "한국어 제목",
       "summary": "한국어 요약 (2~3문장)",
-      "category": "국내" 또는 "해외",
-      "link": "원본 기사 URL"
+      "category": "국내" 또는 "해외"
     }}
   ]
 }}
@@ -70,5 +71,20 @@ def select_and_summarize(articles: list[dict]) -> list[dict]:
     except json.JSONDecodeError as exc:
         raise RuntimeError(f"OpenAI 응답을 JSON으로 파싱하지 못했습니다: {content!r}") from exc
 
-    result = data.get("articles", [])[: config.TOP_N]
+    result = []
+    for item in data.get("articles", [])[: config.TOP_N]:
+        idx = item.get("id")
+        if not isinstance(idx, int) or not (0 <= idx < len(articles)):
+            continue
+        original = articles[idx]
+        result.append(
+            {
+                "title": item.get("title", original["title"]),
+                "summary": item.get("summary", ""),
+                "category": item.get("category", ""),
+                "link": original["link"],
+                "published": original["published"],
+                "source": original["source"],
+            }
+        )
     return result

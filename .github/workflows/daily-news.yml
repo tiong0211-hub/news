@@ -6,10 +6,22 @@ on:
     - cron: "30 22 * * *"
   workflow_dispatch: {}
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
-  send-briefing:
+  build-and-publish:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -20,18 +32,35 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run news briefing
+      - name: Collect, summarize and build newsletter page
         env:
           NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
+          NAVER_QUERIES: ${{ vars.NAVER_QUERIES }}
+          GOOGLE_NEWS_QUERIES: ${{ vars.GOOGLE_NEWS_QUERIES }}
+          TOP_N: ${{ vars.TOP_N }}
+        run: python -m src.build
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload newsletter artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Send Kakao link message
+        env:
           KAKAO_REST_API_KEY: ${{ secrets.KAKAO_REST_API_KEY }}
           KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
           KAKAO_REFRESH_TOKEN: ${{ secrets.KAKAO_REFRESH_TOKEN }}
           GH_PAT: ${{ secrets.GH_PAT }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          NAVER_QUERIES: ${{ vars.NAVER_QUERIES }}
-          GOOGLE_NEWS_QUERIES: ${{ vars.GOOGLE_NEWS_QUERIES }}
-          TOP_N: ${{ vars.TOP_N }}
-        run: python -m src.main
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: python -m src.send_kakao

@@ -2,3 +2,7 @@
 __pycache__/
 *.pyc
 .venv/
+
+# 실행 시마다 생성되는 빌드 산출물 (GitHub Pages 아티팩트로만 배포, 커밋 대상 아님)
+docs/
+briefing_meta.json
