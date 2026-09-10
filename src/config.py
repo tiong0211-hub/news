@@ -19,10 +19,6 @@ NAVER_CLIENT_ID = _env("NAVER_CLIENT_ID")
 NAVER_CLIENT_SECRET = _env("NAVER_CLIENT_SECRET")
 NAVER_QUERIES = _split_csv(_env("NAVER_QUERIES", "경제,증시,코스피,금리,환율,부동산,수출입"))
 
-GOOGLE_NEWS_QUERIES = _split_csv(
-    _env("GOOGLE_NEWS_QUERIES", "economy,stock market,federal reserve,inflation,interest rates")
-)
-
 # 신뢰할 수 있는 언론사만 사용 (도메인 기준). 국내는 Naver API가 언론사 지정 검색을 지원하지
 # 않아 수집 후 필터링하고, 해외는 Google News의 site: 검색으로 아예 해당 언론사만 수집한다.
 DOMESTIC_SOURCE_DOMAINS = _split_csv(

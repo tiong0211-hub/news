@@ -9,8 +9,7 @@
 
 1. 네이버 검색 API(뉴스)로 `NAVER_QUERIES` 키워드별 국내 경제 뉴스 수집 → `DOMESTIC_SOURCE_DOMAINS`
    언론사 + 오늘(KST) 발행분만 필터링
-2. Google News RSS로 `GOOGLE_NEWS_QUERIES` 키워드 + `FOREIGN_SOURCE_DOMAINS` 언론사(site: 검색)로
-   해외 경제 뉴스 수집 → 오늘(KST) 발행분만 필터링
+2. Google News RSS로 `FOREIGN_SOURCE_DOMAINS` 언론사만 site: 검색으로 수집 → 오늘(KST) 발행분만 필터링
 3. OpenAI(`OPENAI_MODEL`, 기본 `gpt-4o-mini`)가 두 목록을 합쳐서
    - 중복/유사 기사 통합
    - 투자와 무관한 기사 제외
@@ -83,7 +82,6 @@
 |---|---|---|
 | `OPENAI_MODEL` | `gpt-4o-mini` | 사용할 OpenAI 모델 |
 | `NAVER_QUERIES` | `경제,증시,코스피,금리,환율,부동산,수출입` | 국내 뉴스 검색 키워드(쉼표 구분) |
-| `GOOGLE_NEWS_QUERIES` | `economy,stock market,federal reserve,inflation,interest rates` | 해외 뉴스 검색 키워드(쉼표 구분) |
 | `DOMESTIC_SOURCE_DOMAINS` | `mk.co.kr,hankyung.com,mt.co.kr,heraldcorp.com,biz.chosun.com,fnnews.com` | 국내 신뢰 언론사 도메인(쉼표 구분). 매일경제/한국경제/머니투데이/헤럴드경제/조선비즈/파이낸셜뉴스 |
 | `FOREIGN_SOURCE_DOMAINS` | `wsj.com,ft.com,nikkei.com` | 해외 신뢰 언론사 도메인(쉼표 구분). WSJ/FT/닛케이 |
 | `TOP_N` | `10` | 최종 선별 뉴스 개수 |
@@ -110,7 +108,7 @@ PAGE_URL="https://example.com" python -m src.send_kakao
 
 ## 커스터마이징
 
-- 검색 키워드: `.env`(로컬) 또는 GitHub Variables `NAVER_QUERIES` / `GOOGLE_NEWS_QUERIES`
+- 국내 검색 키워드: `.env`(로컬) 또는 GitHub Variables `NAVER_QUERIES`
 - 신뢰 언론사 목록: `.env`(로컬) 또는 GitHub Variables `DOMESTIC_SOURCE_DOMAINS` / `FOREIGN_SOURCE_DOMAINS`
 - 요약/선별 기준: `src/summarizer.py`의 `SYSTEM_PROMPT`
 - 뉴스레터 페이지 디자인: `src/newsletter.py`
