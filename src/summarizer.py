@@ -1,8 +1,7 @@
-"""Gemini API를 이용한 번역/요약/중복 제거/선별"""
+"""OpenAI를 이용한 번역/요약/중복 제거/선별"""
 import json
 
-from google import genai
-from google.genai import types
+from openai import OpenAI
 
 from . import config
 
@@ -51,25 +50,25 @@ def select_and_summarize(articles: list[dict]) -> list[dict]:
     """후보 기사 목록을 받아 중복 제거/필터링/번역/요약 후 상위 TOP_N개를 반환한다."""
     if not articles:
         return []
-    if not config.GEMINI_API_KEY:
-        raise RuntimeError("GEMINI_API_KEY 환경변수가 설정되지 않았습니다.")
+    if not config.OPENAI_API_KEY:
+        raise RuntimeError("OPENAI_API_KEY 환경변수가 설정되지 않았습니다.")
 
-    client = genai.Client(api_key=config.GEMINI_API_KEY)
-    response = client.models.generate_content(
-        model=config.GEMINI_MODEL,
-        contents=_build_candidates_payload(articles),
-        config=types.GenerateContentConfig(
-            system_instruction=SYSTEM_PROMPT.format(top_n=config.TOP_N),
-            response_mime_type="application/json",
-            temperature=0.3,
-        ),
+    client = OpenAI(api_key=config.OPENAI_API_KEY)
+    response = client.chat.completions.create(
+        model=config.OPENAI_MODEL,
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT.format(top_n=config.TOP_N)},
+            {"role": "user", "content": _build_candidates_payload(articles)},
+        ],
+        response_format={"type": "json_object"},
+        temperature=0.3,
     )
 
-    content = response.text
+    content = response.choices[0].message.content
     try:
         data = json.loads(content)
     except json.JSONDecodeError as exc:
-        raise RuntimeError(f"Gemini 응답을 JSON으로 파싱하지 못했습니다: {content!r}") from exc
+        raise RuntimeError(f"OpenAI 응답을 JSON으로 파싱하지 못했습니다: {content!r}") from exc
 
     result = data.get("articles", [])[: config.TOP_N]
     return result
