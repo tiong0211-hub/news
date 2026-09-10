@@ -28,7 +28,8 @@ def fetch(display_per_query: int = 15) -> list[dict]:
     for query in config.NAVER_QUERIES:
         params = {"query": query, "display": display_per_query, "sort": "date"}
         resp = requests.get(NAVER_NEWS_URL, headers=headers, params=params, timeout=15)
-        resp.raise_for_status()
+        if resp.status_code != 200:
+            raise RuntimeError(f"네이버 검색 API 호출 실패 ({resp.status_code}): {resp.text}")
         for item in resp.json().get("items", []):
             link = item.get("originallink") or item.get("link")
             if not link or link in seen_links:
