@@ -62,7 +62,7 @@ def send_briefing_link(count: int, date_str: str, page_url: str | None) -> None:
     access_token, new_refresh_token = refresh_access_token()
 
     if count and page_url:
-        text = f"📈 오늘의 투자 뉴스 브리핑 ({date_str})\n국내·해외 경제 뉴스 {count}건을 정리했습니다.\n아래 버튼을 눌러 확인하세요."
+        text = f"📈 오늘의 경제 뉴스 브리핑 ({date_str})\n국내·해외 경제 뉴스 {count}건을 정리했습니다.\n아래 버튼을 눌러 확인하세요."
         send_text_memo(access_token, text, link_url=page_url, button_title="브리핑 보기")
     else:
         send_text_memo(access_token, f"📈 ({date_str}) 오늘은 선별된 투자 관련 뉴스가 없습니다.")

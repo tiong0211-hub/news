@@ -51,7 +51,7 @@ PAGE_TEMPLATE = """\
 <body>
 <div class="wrap">
   <header>
-    <h1>📈 오늘의 투자 뉴스 브리핑</h1>
+    <h1>📈 오늘의 경제 뉴스 브리핑</h1>
     <p>{date_str} · 총 {count}건</p>
   </header>
   {articles_html}
@@ -91,7 +91,7 @@ def render_html(articles: list[dict], date_str: str) -> str:
         for idx, a in enumerate(articles, start=1)
     )
     return PAGE_TEMPLATE.format(
-        title=f"오늘의 투자 뉴스 브리핑 ({date_str})",
+        title=f"오늘의 경제 뉴스 브리핑 ({date_str})",
         date_str=date_str,
         count=len(articles),
         articles_html=articles_html or "<p>오늘은 선별된 투자 관련 뉴스가 없습니다.</p>",

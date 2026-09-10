@@ -23,6 +23,13 @@ GOOGLE_NEWS_QUERIES = _split_csv(
     _env("GOOGLE_NEWS_QUERIES", "economy,stock market,federal reserve,inflation,interest rates")
 )
 
+# 신뢰할 수 있는 언론사만 사용 (도메인 기준). 국내는 Naver API가 언론사 지정 검색을 지원하지
+# 않아 수집 후 필터링하고, 해외는 Google News의 site: 검색으로 아예 해당 언론사만 수집한다.
+DOMESTIC_SOURCE_DOMAINS = _split_csv(
+    _env("DOMESTIC_SOURCE_DOMAINS", "mk.co.kr,hankyung.com,mt.co.kr,heraldcorp.com,biz.chosun.com,fnnews.com")
+)
+FOREIGN_SOURCE_DOMAINS = _split_csv(_env("FOREIGN_SOURCE_DOMAINS", "wsj.com,ft.com,nikkei.com"))
+
 OPENAI_API_KEY = _env("OPENAI_API_KEY")
 OPENAI_MODEL = _env("OPENAI_MODEL", "gpt-4o-mini")
 

@@ -5,6 +5,7 @@ import re
 import requests
 
 from .. import config
+from ..sources import is_allowed_domain
 
 # 검색 오픈API가 NAVER API HUB(NCP)로 이전되면서 호스트와 경로가 바뀌었다.
 # (기존 openapi.naver.com/v1/search/news.json 은 NCP 발급 키로는 401)
@@ -15,8 +16,9 @@ def _strip_tags(text: str) -> str:
     return html.unescape(re.sub(r"<[^>]+>", "", text or ""))
 
 
-def fetch(display_per_query: int = 15) -> list[dict]:
-    """네이버 검색 API로 키워드별 최신 경제 뉴스를 가져와 표준 형식으로 반환한다."""
+def fetch(display_per_query: int = 30) -> list[dict]:
+    """네이버 검색 API로 키워드별 최신 경제 뉴스를 가져와, 신뢰 언론사(DOMESTIC_SOURCE_DOMAINS)
+    도메인의 기사만 표준 형식으로 반환한다."""
     if not config.NAVER_CLIENT_ID or not config.NAVER_CLIENT_SECRET:
         raise RuntimeError("NAVER_CLIENT_ID / NAVER_CLIENT_SECRET 환경변수가 설정되지 않았습니다.")
 
@@ -35,6 +37,8 @@ def fetch(display_per_query: int = 15) -> list[dict]:
         for item in resp.json().get("items", []):
             link = item.get("originallink") or item.get("link")
             if not link or link in seen_links:
+                continue
+            if not is_allowed_domain(link, config.DOMESTIC_SOURCE_DOMAINS):
                 continue
             seen_links.add(link)
             articles.append(

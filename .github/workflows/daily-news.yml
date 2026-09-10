@@ -40,6 +40,8 @@ jobs:
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
           NAVER_QUERIES: ${{ vars.NAVER_QUERIES }}
           GOOGLE_NEWS_QUERIES: ${{ vars.GOOGLE_NEWS_QUERIES }}
+          DOMESTIC_SOURCE_DOMAINS: ${{ vars.DOMESTIC_SOURCE_DOMAINS }}
+          FOREIGN_SOURCE_DOMAINS: ${{ vars.FOREIGN_SOURCE_DOMAINS }}
           TOP_N: ${{ vars.TOP_N }}
         run: python -m src.build
 

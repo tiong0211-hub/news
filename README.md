@@ -1,13 +1,16 @@
-# 매일 투자 뉴스 브리핑 → 카카오톡
+# 매일 경제 뉴스 브리핑 → 카카오톡
 
-매일 아침 국내(네이버)·해외(Google News)의 **당일 발행** 경제 뉴스를 수집해 OpenAI로 중복 제거·번역·
-요약·선별한 뒤, 예쁘게 정리된 뉴스레터 페이지를 GitHub Pages에 발행하고 카카오톡 "나에게 보내기"로
-그 링크 1건을 전송합니다. GitHub Actions 스케줄로 완전 자동 실행됩니다.
+매일 아침 국내(네이버)·해외(Google News)의 **당일 발행** 경제 뉴스를 **신뢰 언론사 목록**에서만
+수집해 OpenAI로 중복 제거·번역·요약·선별한 뒤, 예쁘게 정리된 뉴스레터 페이지를 GitHub Pages에
+발행하고 카카오톡 "나에게 보내기"로 그 링크 1건을 전송합니다. GitHub Actions 스케줄로 완전 자동
+실행됩니다.
 
 ## 동작 흐름
 
-1. 네이버 검색 API(뉴스)로 `NAVER_QUERIES` 키워드별 국내 경제 뉴스 수집 → 오늘(KST) 발행분만 필터링
-2. Google News RSS로 `GOOGLE_NEWS_QUERIES` 키워드별 해외 경제 뉴스 수집 → 오늘(KST) 발행분만 필터링
+1. 네이버 검색 API(뉴스)로 `NAVER_QUERIES` 키워드별 국내 경제 뉴스 수집 → `DOMESTIC_SOURCE_DOMAINS`
+   언론사 + 오늘(KST) 발행분만 필터링
+2. Google News RSS로 `GOOGLE_NEWS_QUERIES` 키워드 + `FOREIGN_SOURCE_DOMAINS` 언론사(site: 검색)로
+   해외 경제 뉴스 수집 → 오늘(KST) 발행분만 필터링
 3. OpenAI(`OPENAI_MODEL`, 기본 `gpt-4o-mini`)가 두 목록을 합쳐서
    - 중복/유사 기사 통합
    - 투자와 무관한 기사 제외
@@ -81,6 +84,8 @@
 | `OPENAI_MODEL` | `gpt-4o-mini` | 사용할 OpenAI 모델 |
 | `NAVER_QUERIES` | `경제,증시,코스피,금리,환율,부동산,수출입` | 국내 뉴스 검색 키워드(쉼표 구분) |
 | `GOOGLE_NEWS_QUERIES` | `economy,stock market,federal reserve,inflation,interest rates` | 해외 뉴스 검색 키워드(쉼표 구분) |
+| `DOMESTIC_SOURCE_DOMAINS` | `mk.co.kr,hankyung.com,mt.co.kr,heraldcorp.com,biz.chosun.com,fnnews.com` | 국내 신뢰 언론사 도메인(쉼표 구분). 매일경제/한국경제/머니투데이/헤럴드경제/조선비즈/파이낸셜뉴스 |
+| `FOREIGN_SOURCE_DOMAINS` | `wsj.com,ft.com,nikkei.com` | 해외 신뢰 언론사 도메인(쉼표 구분). WSJ/FT/닛케이 |
 | `TOP_N` | `10` | 최종 선별 뉴스 개수 |
 
 ## 실행 스케줄
@@ -106,6 +111,7 @@ PAGE_URL="https://example.com" python -m src.send_kakao
 ## 커스터마이징
 
 - 검색 키워드: `.env`(로컬) 또는 GitHub Variables `NAVER_QUERIES` / `GOOGLE_NEWS_QUERIES`
+- 신뢰 언론사 목록: `.env`(로컬) 또는 GitHub Variables `DOMESTIC_SOURCE_DOMAINS` / `FOREIGN_SOURCE_DOMAINS`
 - 요약/선별 기준: `src/summarizer.py`의 `SYSTEM_PROMPT`
 - 뉴스레터 페이지 디자인: `src/newsletter.py`
 - 카카오 메시지 문구: `src/kakao.py`의 `send_briefing_link`
@@ -120,6 +126,8 @@ PAGE_URL="https://example.com" python -m src.send_kakao
 - Google News RSS는 비공식 피드로, 향후 변경/중단될 수 있습니다.
 - "오늘 발행" 필터는 각 API/피드가 제공하는 발행일(pubDate)에 의존합니다. 발행일을 파싱할 수 없는
   기사는 안전하게 제외됩니다.
+- 언론사 화이트리스트 + 당일 발행 필터를 같이 적용하다 보니, 날에 따라 최종 후보가 적어(심하면 0건)
+  선정될 수 있습니다. 후보가 부족하면 `TOP_N`보다 적은 건수만 발송되거나, 아예 발송을 건너뜁니다.
 - 카카오 API는 임의의 파일(PDF 등) 첨부를 지원하지 않아, 뉴스레터는 GitHub Pages 웹페이지로
   발행하고 카카오톡에는 링크만 전송합니다.
 - OpenAI API 호출 비용이 발생합니다(사용량에 따라 과금).
