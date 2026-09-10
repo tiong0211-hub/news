@@ -1,0 +1,47 @@
+"""국내 경제 뉴스 수집 (네이버 검색 API - 뉴스)"""
+import html
+import re
+
+import requests
+
+from .. import config
+
+NAVER_NEWS_URL = "https://openapi.naver.com/v1/search/news.json"
+
+
+def _strip_tags(text: str) -> str:
+    return html.unescape(re.sub(r"<[^>]+>", "", text or ""))
+
+
+def fetch(display_per_query: int = 15) -> list[dict]:
+    """네이버 검색 API로 키워드별 최신 경제 뉴스를 가져와 표준 형식으로 반환한다."""
+    if not config.NAVER_CLIENT_ID or not config.NAVER_CLIENT_SECRET:
+        raise RuntimeError("NAVER_CLIENT_ID / NAVER_CLIENT_SECRET 환경변수가 설정되지 않았습니다.")
+
+    headers = {
+        "X-Naver-Client-Id": config.NAVER_CLIENT_ID,
+        "X-Naver-Client-Secret": config.NAVER_CLIENT_SECRET,
+    }
+
+    seen_links = set()
+    articles = []
+    for query in config.NAVER_QUERIES:
+        params = {"query": query, "display": display_per_query, "sort": "date"}
+        resp = requests.get(NAVER_NEWS_URL, headers=headers, params=params, timeout=15)
+        resp.raise_for_status()
+        for item in resp.json().get("items", []):
+            link = item.get("originallink") or item.get("link")
+            if not link or link in seen_links:
+                continue
+            seen_links.add(link)
+            articles.append(
+                {
+                    "source": "naver",
+                    "query": query,
+                    "title": _strip_tags(item.get("title")),
+                    "description": _strip_tags(item.get("description")),
+                    "link": link,
+                    "published": item.get("pubDate", ""),
+                }
+            )
+    return articles
