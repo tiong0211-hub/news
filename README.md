@@ -1,6 +1,6 @@
 # 매일 투자 뉴스 브리핑 → 카카오톡
 
-매일 아침 국내(네이버)·해외(Google News) 경제 뉴스를 수집해 OpenAI로 중복 제거·번역·요약·선별한 뒤,
+매일 아침 국내(네이버)·해외(Google News) 경제 뉴스를 수집해 Gemini로 중복 제거·번역·요약·선별한 뒤,
 투자 참고용 핵심 뉴스 상위 N건(기본 10건)을 카카오톡 "나에게 보내기"로 전송합니다.
 GitHub Actions 스케줄로 완전 자동 실행됩니다.
 
@@ -8,7 +8,7 @@ GitHub Actions 스케줄로 완전 자동 실행됩니다.
 
 1. 네이버 검색 API(뉴스)로 `NAVER_QUERIES` 키워드별 최신 국내 경제 뉴스 수집
 2. Google News RSS로 `GOOGLE_NEWS_QUERIES` 키워드별 최근 24시간 해외 경제 뉴스 수집
-3. OpenAI(`OPENAI_MODEL`, 기본 `gpt-4o-mini`)가 두 목록을 합쳐서
+3. Gemini(`GEMINI_MODEL`, 기본 `gemini-2.5-flash`)가 두 목록을 합쳐서
    - 중복/유사 기사 통합
    - 투자와 무관한 기사 제외
    - 해외 기사 한국어 번역
@@ -24,10 +24,10 @@ GitHub Actions 스케줄로 완전 자동 실행됩니다.
 2. 사용 API에서 "검색" 추가
 3. 발급된 Client ID / Client Secret 확인
 
-### 2) OpenAI API
+### 2) Gemini API
 
-1. https://platform.openai.com/api-keys 에서 API 키 발급
-2. 결제 수단 등록 (요약 10건/일 기준 비용은 매우 낮은 수준)
+1. https://aistudio.google.com/apikey 에서 API 키 발급
+2. 무료 등급으로도 요약 10건/일 정도는 충분히 커버되지만, 필요 시 Google Cloud 결제 연결로 등급 상향 가능
 
 ### 3) 카카오 "나에게 보내기"
 
@@ -55,7 +55,7 @@ GitHub Actions 스케줄로 완전 자동 실행됩니다.
 |---|---|
 | `NAVER_CLIENT_ID` | 네이버 애플리케이션 Client ID |
 | `NAVER_CLIENT_SECRET` | 네이버 애플리케이션 Client Secret |
-| `OPENAI_API_KEY` | OpenAI API 키 |
+| `GEMINI_API_KEY` | Gemini API 키 |
 | `KAKAO_REST_API_KEY` | 카카오 앱 REST API 키 |
 | `KAKAO_REFRESH_TOKEN` | `scripts/kakao_auth.py` 실행 후 발급된 refresh_token |
 | `GH_PAT` (선택) | `repo` 권한 Personal Access Token. 카카오 refresh_token이 만료 임박 시 자동 회전되는데, 이 값을 등록해두면 새 토큰을 GitHub Secret에 자동 반영합니다. 없으면 refresh_token이 회전될 때(대략 2달 주기) 수동으로 다시 발급해야 할 수 있습니다. |
@@ -65,7 +65,7 @@ GitHub Actions 스케줄로 완전 자동 실행됩니다.
 
 | Variable 이름 | 기본값 | 설명 |
 |---|---|---|
-| `OPENAI_MODEL` | `gpt-4o-mini` | 사용할 OpenAI 모델 |
+| `GEMINI_MODEL` | `gemini-2.5-flash` | 사용할 Gemini 모델 |
 | `NAVER_QUERIES` | `경제,증시,코스피,금리,환율,부동산,수출입` | 국내 뉴스 검색 키워드(쉼표 구분) |
 | `GOOGLE_NEWS_QUERIES` | `economy,stock market,federal reserve,inflation,interest rates` | 해외 뉴스 검색 키워드(쉼표 구분) |
 | `TOP_N` | `10` | 최종 발송 뉴스 개수 |
@@ -100,4 +100,4 @@ python -m src.main
 - Google News RSS는 비공식 피드로, 향후 변경/중단될 수 있습니다.
 - 카카오 "나에게 보내기" 기본 `text` 템플릿은 글자 수 제한이 있어 요약이 길면 잘릴 수 있습니다
   (`KAKAO_TEXT_MAX_LEN`으로 조정).
-- OpenAI API 호출 비용이 발생합니다(사용량에 따라 과금).
+- Gemini API 호출 비용이 발생할 수 있습니다(무료 등급 한도를 넘으면 사용량에 따라 과금).

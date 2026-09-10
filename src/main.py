@@ -25,7 +25,7 @@ def run() -> None:
         logger.warning("수집된 뉴스가 없습니다. 종료합니다.")
         return
 
-    logger.info("OpenAI로 중복 제거/필터링/번역/요약/선별 중 (후보 %d건)", len(candidates))
+    logger.info("Gemini로 중복 제거/필터링/번역/요약/선별 중 (후보 %d건)", len(candidates))
     selected = summarizer.select_and_summarize(candidates)
     logger.info("최종 선별 %d건", len(selected))
 

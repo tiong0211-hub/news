@@ -23,8 +23,8 @@ GOOGLE_NEWS_QUERIES = _split_csv(
     _env("GOOGLE_NEWS_QUERIES", "economy,stock market,federal reserve,inflation,interest rates")
 )
 
-OPENAI_API_KEY = _env("OPENAI_API_KEY")
-OPENAI_MODEL = _env("OPENAI_MODEL", "gpt-4o-mini")
+GEMINI_API_KEY = _env("GEMINI_API_KEY")
+GEMINI_MODEL = _env("GEMINI_MODEL", "gemini-2.5-flash")
 
 KAKAO_REST_API_KEY = _env("KAKAO_REST_API_KEY")
 KAKAO_REFRESH_TOKEN = _env("KAKAO_REFRESH_TOKEN")
