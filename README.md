@@ -22,6 +22,7 @@
 5. 14일 지난 아카이브 파일은 자동 삭제, 변경사항을 저장소에 커밋
 6. GitHub Pages에 페이지 배포
 7. 카카오톡 "나에게 보내기"로 오늘 페이지 링크 1건 발송
+8. (선택) `EMAIL_ADDRESS`/`EMAIL_APP_PASSWORD`가 설정되어 있으면, 같은 내용을 이메일로도 발송
 
 ## 사전 준비
 
@@ -59,12 +60,26 @@
    안내되는 URL로 접속 → 카카오 로그인/동의 → 리다이렉트된 주소의 `code=` 값(또는 전체 URL)을
    터미널에 붙여넣으면 `access_token`/`refresh_token`이 출력됩니다.
 
-### 4) GitHub Pages 활성화
+### 4) (선택) 이메일로도 받기
+
+카카오톡 외에 이메일로도 같은 브리핑을 받고 싶다면 설정하세요. 설정하지 않으면 이 단계는 자동으로
+건너뜁니다.
+
+**Gmail 기준:**
+1. Google 계정 → 보안 → 2단계 인증 켜기 (필수, 앱 비밀번호는 2단계 인증 활성화 후에만 발급됩니다)
+2. Google 계정 → 보안 → 앱 비밀번호(App passwords) → 새로 만들기 → 발급된 16자리 값을 복사
+   (일반 로그인 비밀번호가 아닙니다)
+3. 아래 GitHub Secrets에 본인 Gmail 주소와 이 앱 비밀번호를 등록
+
+다른 메일 제공자를 쓰신다면 `EMAIL_SMTP_HOST`/`EMAIL_SMTP_PORT`를 해당 제공자의 SMTP 정보로
+바꾸고, 해당 제공자의 "앱 비밀번호" 또는 SMTP 인증 정보를 사용하세요.
+
+### 5) GitHub Pages 활성화
 
 저장소 **Settings → Pages → Build and deployment → Source**를 **"GitHub Actions"**로 설정하세요.
 (별도 브랜치/폴더 지정 불필요 — 워크플로우가 매일 `docs/` 내용을 직접 배포합니다.)
 
-### 5) GitHub Secrets 등록
+### 6) GitHub Secrets 등록
 
 저장소 Settings → Secrets and variables → Actions → New repository secret 에 아래 값을 등록하세요.
 
@@ -77,6 +92,8 @@
 | `KAKAO_CLIENT_SECRET` (조건부) | 앱 키 > 클라이언트 시크릿이 "카카오 로그인"에 대해 활성화(ON)된 경우 그 코드 값. 활성화되어 있으면 토큰 발급/갱신 요청에 필수입니다(없으면 `KOE010 Bad client credentials` 에러). |
 | `KAKAO_REFRESH_TOKEN` | `scripts/kakao_auth.py` 실행 후 발급된 refresh_token |
 | `GH_PAT` (선택) | `repo` 권한 Personal Access Token. 카카오 refresh_token이 만료 임박 시 자동 회전되는데, 이 값을 등록해두면 새 토큰을 GitHub Secret에 자동 반영합니다. 없으면 refresh_token이 회전될 때(대략 2달 주기) 수동으로 다시 발급해야 할 수 있습니다. |
+| `EMAIL_ADDRESS` (선택) | 발신용 이메일 주소 (예: Gmail 주소). 비워두면 이메일 발송 자체를 건너뜁니다. |
+| `EMAIL_APP_PASSWORD` (선택) | 위 계정의 앱 비밀번호(App password). 일반 로그인 비밀번호가 아닙니다. |
 
 선택적으로 Settings → Secrets and variables → Actions → Variables 탭에서 아래 값을 조정할 수 있습니다
 (등록하지 않으면 기본값 사용):
@@ -88,6 +105,9 @@
 | `DOMESTIC_SOURCE_DOMAINS` | `mk.co.kr,hankyung.com,mt.co.kr,heraldcorp.com,biz.chosun.com,fnnews.com` | 국내 신뢰 언론사 도메인(쉼표 구분). 매일경제/한국경제/머니투데이/헤럴드경제/조선비즈/파이낸셜뉴스 |
 | `FOREIGN_SOURCE_DOMAINS` | `wsj.com,ft.com,nikkei.com` | 해외 신뢰 언론사 도메인(쉼표 구분). WSJ/FT/닛케이. 각 도메인은 `src/collectors/foreign_news.py`의 `KNOWN_FEEDS`에 등록된 RSS 피드가 있어야 실제로 수집됩니다 |
 | `TOP_N` | `10` | 최종 선별 뉴스 개수 |
+| `EMAIL_SMTP_HOST` | `smtp.gmail.com` | 이메일 발송용 SMTP 서버 (Gmail이 아니면 변경) |
+| `EMAIL_SMTP_PORT` | `587` | SMTP 포트 |
+| `EMAIL_TO` | `EMAIL_ADDRESS`와 동일 | 받는 사람 주소. 다른 주소로 받고 싶으면 설정 |
 
 ## 실행 스케줄
 
@@ -107,6 +127,9 @@ open docs/index.html       # 결과 미리보기 (macOS 기준, 다른 OS는 파
 # 카카오 발송까지 로컬에서 테스트하려면 GitHub Pages에 해당하는 공개 URL이 필요합니다.
 # 임시로 아무 URL(또는 실제로 배포된 이전 페이지 URL)을 넣어 형식만 확인할 수 있습니다.
 PAGE_URL="https://example.com" python -m src.send_kakao
+
+# 이메일 발송 테스트 (EMAIL_ADDRESS/EMAIL_APP_PASSWORD를 .env에 설정한 경우)
+python -m src.send_email
 ```
 
 ## 커스터마이징

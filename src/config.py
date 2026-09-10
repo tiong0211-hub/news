@@ -38,3 +38,10 @@ TOP_N = int(_env("TOP_N", "10"))
 
 GH_PAT = _env("GH_PAT")
 GITHUB_REPOSITORY = _env("GITHUB_REPOSITORY")
+
+# (선택) 이메일 발송 — EMAIL_ADDRESS/EMAIL_APP_PASSWORD가 비어 있으면 이메일 발송을 건너뛴다.
+EMAIL_SMTP_HOST = _env("EMAIL_SMTP_HOST", "smtp.gmail.com")
+EMAIL_SMTP_PORT = int(_env("EMAIL_SMTP_PORT", "587"))
+EMAIL_ADDRESS = _env("EMAIL_ADDRESS")
+EMAIL_APP_PASSWORD = _env("EMAIL_APP_PASSWORD")
+EMAIL_TO = _env("EMAIL_TO", EMAIL_ADDRESS)

@@ -73,3 +73,12 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: python -m src.send_kakao
+
+      - name: Send email briefing (optional)
+        env:
+          EMAIL_SMTP_HOST: ${{ vars.EMAIL_SMTP_HOST }}
+          EMAIL_SMTP_PORT: ${{ vars.EMAIL_SMTP_PORT }}
+          EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
+          EMAIL_APP_PASSWORD: ${{ secrets.EMAIL_APP_PASSWORD }}
+          EMAIL_TO: ${{ vars.EMAIL_TO }}
+        run: python -m src.send_email
