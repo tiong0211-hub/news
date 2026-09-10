@@ -8,7 +8,7 @@ from datetime import datetime
 from pathlib import Path
 
 from . import newsletter, summarizer
-from .collectors import google_news, naver
+from .collectors import foreign_news, naver
 from .freshness import KST, is_today_kst
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -25,7 +25,7 @@ def run() -> None:
     logger.info("국내 뉴스 %d건 수집 (오늘자만)", len(domestic))
 
     logger.info("해외 뉴스 수집 시작")
-    foreign = google_news.fetch()
+    foreign = foreign_news.fetch()
     foreign = [a for a in foreign if is_today_kst(a["published"])]
     logger.info("해외 뉴스 %d건 수집 (오늘자만)", len(foreign))
 
