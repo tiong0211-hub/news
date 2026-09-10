@@ -33,14 +33,14 @@ def run() -> None:
     message = MIMEMultipart("alternative")
     message["Subject"] = f"오늘의 경제 뉴스 브리핑 ({date_str}) - 총 {count}건"
     message["From"] = config.EMAIL_ADDRESS
-    message["To"] = config.EMAIL_TO
+    message["To"] = ", ".join(config.EMAIL_TO)
     message.attach(MIMEText(body_html, "html", "utf-8"))
 
-    logger.info("이메일 발송 시작 (%s -> %s)", config.EMAIL_ADDRESS, config.EMAIL_TO)
+    logger.info("이메일 발송 시작 (%s -> %s)", config.EMAIL_ADDRESS, ", ".join(config.EMAIL_TO))
     with smtplib.SMTP(config.EMAIL_SMTP_HOST, config.EMAIL_SMTP_PORT) as server:
         server.starttls()
         server.login(config.EMAIL_ADDRESS, config.EMAIL_APP_PASSWORD)
-        server.sendmail(config.EMAIL_ADDRESS, [config.EMAIL_TO], message.as_string())
+        server.sendmail(config.EMAIL_ADDRESS, config.EMAIL_TO, message.as_string())
     logger.info("이메일 발송 완료")
 
 

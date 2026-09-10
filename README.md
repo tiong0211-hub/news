@@ -107,7 +107,7 @@
 | `TOP_N` | `10` | 최종 선별 뉴스 개수 |
 | `EMAIL_SMTP_HOST` | `smtp.gmail.com` | 이메일 발송용 SMTP 서버 (Gmail이 아니면 변경) |
 | `EMAIL_SMTP_PORT` | `587` | SMTP 포트 |
-| `EMAIL_TO` | `EMAIL_ADDRESS`와 동일 | 받는 사람 주소. 다른 주소로 받고 싶으면 설정 |
+| `EMAIL_TO` | `EMAIL_ADDRESS`와 동일 | 받는 사람 주소(쉼표로 구분해 여러 명 등록 가능. 예: `a@x.com,b@y.com`) |
 
 ## 실행 스케줄
 

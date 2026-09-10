@@ -49,4 +49,5 @@ EMAIL_SMTP_HOST = _env("EMAIL_SMTP_HOST", "smtp.gmail.com")
 EMAIL_SMTP_PORT = int(_env("EMAIL_SMTP_PORT", "587"))
 EMAIL_ADDRESS = _env("EMAIL_ADDRESS")
 EMAIL_APP_PASSWORD = _env("EMAIL_APP_PASSWORD")
-EMAIL_TO = _env("EMAIL_TO", EMAIL_ADDRESS)
+# 쉼표로 여러 수신인 등록 가능 (예: a@x.com,b@y.com). 비워두면 EMAIL_ADDRESS로 자기 자신에게 발송.
+EMAIL_TO = _split_csv(_env("EMAIL_TO", EMAIL_ADDRESS))
