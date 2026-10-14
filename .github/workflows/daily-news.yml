@@ -2,8 +2,10 @@ name: Daily Investment News Briefing
 
 on:
   schedule:
-    # 매일 08:00 KST, 월~금만 (UTC 기준 일~목 23:00). 한국 공휴일은 src/build.py에서 건너뜀.
-    - cron: "0 23 * * 0-4"
+    # 매일 07:45 KST, 월~금만 (UTC 기준 일~목 22:45). 한국 공휴일은 src/build.py에서 건너뜀.
+    # 정시(매시 00분)는 GitHub Actions 스케줄러가 가장 혼잡해 지연이 커지므로, 혼잡을 피하고
+    # 08:00 발행 목표에 여유를 두기 위해 45분으로 지정한다.
+    - cron: "45 22 * * 0-4"
   workflow_dispatch: {}
 
 permissions:
