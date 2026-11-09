@@ -58,7 +58,7 @@ def _write_github_output(key: str, value: str) -> None:
 
 def run() -> None:
     now = datetime.now(KST)
-    if config.GITHUB_EVENT_NAME == "schedule" and is_skip_day(now):
+    if not config.FORCE_RUN and is_skip_day(now):
         logger.info("주말/공휴일이라 오늘(%s)은 발행을 건너뜁니다.", now.strftime("%Y-%m-%d"))
         _write_github_output("skip", "true")
         return

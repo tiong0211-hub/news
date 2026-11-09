@@ -2,8 +2,8 @@
 
 매일 아침 국내(네이버)·해외(WSJ/FT/Nikkei Asia/CNBC 공식 RSS)의 **전일 정오~발행 시점 발행** 경제 뉴스를 **신뢰 언론사 목록**에서만
 수집해 OpenAI로 중복 제거·번역·요약·선별한 뒤, 예쁘게 정리된 뉴스레터 페이지를 GitHub Pages에
-발행하고 카카오톡 "나에게 보내기"로 그 링크 1건을 전송합니다. GitHub Actions 스케줄로 완전 자동
-실행됩니다.
+발행하고 카카오톡 "나에게 보내기"로 그 링크 1건을 전송합니다. 외부 크론 서비스가 매일 GitHub
+Actions의 `workflow_dispatch`를 호출해 완전 자동으로 실행됩니다 (자세한 내용은 "실행 스케줄" 참고).
 
 ## 동작 흐름
 
@@ -111,15 +111,33 @@
 
 ## 실행 스케줄
 
-`.github/workflows/daily-news.yml` 기본값은 **평일(월~금) 08:00 KST**(UTC 기준 일~목 23:00)입니다.
-주말은 cron 자체에서 실행되지 않고, **한국 공휴일**(대체공휴일 포함)은 `src/kr_calendar.py`가
-스케줄 실행일 때만 판별해서 뉴스 수집/발송을 전부 건너뜁니다(수동 실행은 공휴일이어도 항상 진행).
+GitHub Actions의 `schedule` 트리거는 혼잡 시 몇 시간씩 지연될 수 있어 사용하지 않습니다. 대신
+**외부 크론 서비스(cron-job.org 등)가 매일 정해진 시각(평일 08:00 KST 등)에 GitHub REST API로
+이 저장소의 `workflow_dispatch`를 직접 호출**하는 방식으로 실행합니다. 자세한 설정 방법은
+아래 "외부 크론 설정"을 참고하세요.
 
-다른 시간을 원하면 워크플로우 파일의 `cron` 표현식을 수정하세요(cron은 UTC 기준이라, KST 08:00은
-전날 UTC 23:00입니다). 요일 제한을 바꾸려면 `cron`의 마지막 필드(`0-4` = 일~목, KST 기준 월~금)를
-조정하세요.
+**주말/공휴일 건너뛰기**는 트리거 방식과 무관하게 항상 적용됩니다(`src/kr_calendar.py`, 대체공휴일
+포함). 워크플로우를 Actions 탭에서 수동 실행할 때 `force` 입력을 `true`로 주면 이 건너뛰기를
+무시하고 강제로 실행할 수 있습니다(테스트용). `force`를 비워두거나 `false`로 두면 평소와 동일하게
+주말/공휴일에는 건너뜁니다.
 
-수동 실행: 저장소 Actions 탭 → "Daily Investment News Briefing" → Run workflow
+수동 실행: 저장소 Actions 탭 → "Daily Investment News Briefing" → Run workflow (필요시 `force` 체크)
+
+### 외부 크론 설정 (cron-job.org 예시)
+
+1. GitHub에서 이 저장소에 대해 **Actions 쓰기 권한이 있는 Personal Access Token(PAT)**을 발급합니다
+   (Fine-grained PAT: Contents 읽기/쓰기, Actions 읽기/쓰기 권한 / 또는 Classic PAT: `repo` 스코프).
+   카카오 발송에 쓰는 `GH_PAT`와 별개로 만들어도 되고 동일 토큰을 재사용해도 됩니다.
+2. [cron-job.org](https://cron-job.org)에 가입하고 새 Cronjob을 만듭니다.
+3. 요청 설정:
+   - URL: `https://api.github.com/repos/<OWNER>/<REPO>/actions/workflows/daily-news.yml/dispatches`
+   - Method: `POST`
+   - Headers: `Authorization: Bearer <PAT>`, `Accept: application/vnd.github+json`, `Content-Type: application/json`
+   - Body: `{"ref": "claude/economic-news-kakao-summary-lbuu8r"}` (실제 배포 브랜치명으로 교체)
+4. 스케줄: 평일 08:00 KST = UTC 기준 전날 23:00. cron-job.org 설정에서 요일을 월~금(Mon-Fri)으로,
+   시각을 23:00 UTC(또는 혼잡을 피하려면 22:45 UTC 등 정시가 아닌 분)로 지정합니다.
+5. 테스트: cron-job.org의 "Run now" 버튼으로 즉시 호출해보고, 저장소 Actions 탭에 실행이
+   바로(수 초~수십 초 내) 뜨는지 확인합니다.
 
 ## 로컬 테스트
 
@@ -147,7 +165,7 @@ python -m src.send_email
 - 수집 대상 시간대: `src/freshness.py`의 `is_in_briefing_window` (전일 12:00 KST ~ 발행 시점, `WINDOW_START_HOUR`로 시작 시각 조정 가능)
 - 아카이브 보관 기간: `src/build.py`의 `ARCHIVE_RETENTION_DAYS` (기본 14일)
 - 주말/공휴일 건너뛰기 로직: `src/kr_calendar.py` (`holidays` 패키지의 한국 공휴일 데이터 사용)
-- 실행 시각: `.github/workflows/daily-news.yml`의 `cron`
+- 실행 시각: cron-job.org(또는 사용 중인 외부 크론 서비스)의 스케줄 설정
 
 ## 알려진 제약
 

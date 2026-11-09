@@ -1,12 +1,16 @@
 name: Daily Investment News Briefing
 
 on:
-  schedule:
-    # 매일 07:45 KST, 월~금만 (UTC 기준 일~목 22:45). 한국 공휴일은 src/build.py에서 건너뜀.
-    # 정시(매시 00분)는 GitHub Actions 스케줄러가 가장 혼잡해 지연이 커지므로, 혼잡을 피하고
-    # 08:00 발행 목표에 여유를 두기 위해 45분으로 지정한다.
-    - cron: "45 22 * * 0-4"
-  workflow_dispatch: {}
+  # GitHub Actions의 schedule 트리거는 혼잡 시 몇 시간씩 지연될 수 있어 사용하지 않는다.
+  # 대신 외부 크론 서비스(cron-job.org 등)가 매일 정해진 시각에 이 workflow_dispatch를
+  # (inputs 없이) 호출해서 실행한다. 주말/공휴일 건너뛰기는 src/build.py가 항상 수행하며,
+  # 테스트 목적으로 건너뛰기를 무시하고 강제 실행하려면 force 입력을 true로 주고 수동 실행한다.
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "주말/공휴일이어도 강제로 실행 (테스트용)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -45,7 +49,7 @@ jobs:
           DOMESTIC_SOURCE_DOMAINS: ${{ vars.DOMESTIC_SOURCE_DOMAINS }}
           FOREIGN_SOURCE_DOMAINS: ${{ vars.FOREIGN_SOURCE_DOMAINS }}
           TOP_N: ${{ vars.TOP_N }}
-          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          FORCE_RUN: ${{ github.event.inputs.force }}
         run: python -m src.build
 
       - name: Commit newsletter archive

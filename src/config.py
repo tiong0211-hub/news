@@ -40,9 +40,9 @@ TOP_N = int(_env("TOP_N", "10"))
 
 GH_PAT = _env("GH_PAT")
 GITHUB_REPOSITORY = _env("GITHUB_REPOSITORY")
-# GitHub Actions가 채워주는 트리거 종류 ("schedule" 또는 "workflow_dispatch" 등).
-# 주말/공휴일 자동 건너뛰기는 스케줄 실행에만 적용하고, 수동 실행은 항상 진행한다.
-GITHUB_EVENT_NAME = _env("GITHUB_EVENT_NAME")
+# 주말/공휴일에는 항상 건너뛴다 (외부 크론이든 수동 실행이든 동일하게 적용).
+# workflow_dispatch의 force 입력이 true일 때만 건너뛰기를 무시하고 강제로 실행한다 (테스트용).
+FORCE_RUN = _env("FORCE_RUN").lower() == "true"
 
 # (선택) 이메일 발송 — EMAIL_ADDRESS/EMAIL_APP_PASSWORD가 비어 있으면 이메일 발송을 건너뛴다.
 EMAIL_SMTP_HOST = _env("EMAIL_SMTP_HOST", "smtp.gmail.com")
