@@ -71,6 +71,13 @@ jobs:
         with:
           path: docs
 
+      # GitHub의 artifact 저장소가 방금 올라간 파일을 바로 못 찾아 deploy-pages가
+      # "No artifacts found"로 실패하는 경우가 가끔 있다(GitHub 쪽 전파 지연). 짧게
+      # 대기해 그 지연을 흡수한다.
+      - name: Wait for artifact to become available
+        if: steps.build.outputs.skip != 'true'
+        run: sleep 15
+
       - name: Deploy to GitHub Pages
         if: steps.build.outputs.skip != 'true'
         id: deployment
